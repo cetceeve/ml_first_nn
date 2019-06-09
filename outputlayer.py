@@ -8,3 +8,7 @@ class OutputLayer():
 
     def feedSample(self, dataVector):
         return [neuron.feedForward(dataVector, self.weights[i]) for i, neuron in enumerate(self.neurons)]
+
+    def backprop(self, lrate, error, preLayerDataVector):
+        # neue gewichte = bisherige gewichte * lrate * error * ableitung aktivierungsfunktion output * aktivierung hidden
+        pass
