@@ -1,3 +1,6 @@
+import csv
+import numpy as np
+
 from inputlayer import InputLayer
 from hiddenlayer import HiddenLayer
 from outputlayer import OutputLayer
@@ -16,14 +19,30 @@ class Network:
         self.outputLayer = OutputLayer(self.numOfHiddens, self.numOfOutputs)
 
         self.feedSample(self.dataVector)
+        # types, groundTruths, dataVectors = self.getData()
+        
+    def getData(self):
+        rawData = self.readCSV()
+        types, groundTruths = self.getGTs(rawData)
+        dataVectors = np.array([row[:-1] for row in rawData], float)
+        return types, groundTruths, dataVectors
+        
+    def readCSV(self):
+        with open("samples_4_classes_normalized.csv", mode="r") as dataFile:
+            return list(csv.reader(dataFile))[1:]
     
+    def getGTs(self, rawData):
+        types = list({row[len(row) - 1] for row in rawData})
+        groundTruths = np.full((len(rawData), len(types)), -1, int)
+        
+        for i, row in enumerate(rawData):
+            groundTruths[i][types.index(row[len(row) - 1])] = 1
+        return types, groundTruths
+
     def feedSample(self, dataVector):
         actInput = self.inputLayer.feedSample(dataVector)
-        print(actInput)
         actHidden = self.hiddenLayer.feedSample(actInput)
-        print(actHidden)
         actOutput = self.outputLayer.feedSample(actHidden)
-        print(actOutput)
     
     def backpropagate(self):
         pass

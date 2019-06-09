@@ -10,5 +10,5 @@ class HiddenLayer():
         return [neuron.feedForward(dataVector, self.weights[i]) for i, neuron in enumerate(self.neurons)]
 
     def backprop(self, lrate):
-        # neue gewichte = bisherige gewichte * lrate * aktivierung input * ableitung aktivierungsfunktions hier * summe von(error * ableitung aktivierungsfunktion output * aktivierung hidden)
+        # neue gewichte = bisherige gewichte * lrate * aktivierung input * ableitung aktivierungsfunktions hier * summe über output neuronen((GT - act output) * first deriv output * weight)
         pass
