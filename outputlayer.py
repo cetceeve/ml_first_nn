@@ -9,7 +9,9 @@ class OutputLayer():
     def feedSample(self, dataVector):
         return [neuron.feedForward(dataVector, self.weights[i]) for i, neuron in enumerate(self.neurons)]
 
-    def backprop(self, lrate, GT, preLayerDataVector):
+    def backprop(self, lrate, errorVector, actVectorHidden):
         # iteration über output neuronen
-        # neue gewichte = bisherige gewichte * lrate * (GT - act putput) * first deriv output * act hidden
-        pass
+        # neue gewichte = bisherige gewichte - lrate * error * first deriv output * act hidden
+        for i, neuron in enumerate(self.neurons):
+            for j, actHidden in enumerate(actVectorHidden):
+                self.weights[i][j] += lrate * errorVector[i] * neuron.firstDeriv * actHidden

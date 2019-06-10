@@ -10,6 +10,7 @@ class Network:
     numOfInputs = 10
     numOfHiddens = 12
     numOfOutputs = 4
+    lrate = 0.01
 
     def __init__(self):
         # create all layers
@@ -55,15 +56,19 @@ class Network:
             self.feedSample(vector, groundTruth)
             counter += 1
             print(str(counter) + "/40000", end="\r")
-            # break # open up loop when ready
 
     def feedSample(self, dataVector, groundTruth):
-        actInput = self.inputLayer.feedSample(dataVector)
-        actHidden = self.hiddenLayer.feedSample(actInput)
-        actOutput = self.outputLayer.feedSample(actHidden)
+        actVectorInput = self.inputLayer.feedSample(dataVector)
+        actVectorHidden = self.hiddenLayer.feedSample(actVectorInput)
+        actVectorOutput = self.outputLayer.feedSample(actVectorHidden)
+        errorVector = self.error(actVectorOutput, groundTruth)
+        self.backprop(errorVector, actVectorHidden)
+
+    def error(self, actVectorOutput, groundTruth):
+        return [truth - act for act, truth in zip(actVectorOutput, groundTruth)]
     
-    def backpropagate(self):
-        pass
+    def backprop(self, errorVector, actVectorHidden):
+        self.outputLayer.backprop(self.lrate, errorVector, actVectorHidden)
 
 if __name__ == "__main__":
     Network()
