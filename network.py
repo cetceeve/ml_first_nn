@@ -32,7 +32,7 @@ class Network:
         self.trainNetwork(types, groundTruths, dataVectors)
         t1 = time.time()
         print("\nTime: " + str(t1 - t0))
-        
+
     def getData(self):
         rawData = self.readCSV()
         shuffle(rawData)
@@ -47,11 +47,11 @@ class Network:
     def readCSV(self):
         with open("samples_4_classes_normalized.csv", mode="r") as dataFile:
             return list(csv.reader(dataFile))[1:]
-    
+
     def getGTs(self, rawData):
         types = list({row[-1] for row in rawData})
         groundTruths = np.full((len(rawData), len(types)), -1, int)
-        
+
         for i, row in enumerate(rawData):
             groundTruths[i][types.index(row[-1])] = 1
         return types, groundTruths
@@ -93,7 +93,7 @@ class Network:
 
     def getErrorVector(self, actVectorOutput, groundTruth):
         return [truth - act for act, truth in zip(actVectorOutput, groundTruth)]
-    
+
     def backprop(self, errorVector, actVectorHidden, actVectorInput):
         self.outputLayer.backprop(self.lrate, errorVector, actVectorHidden)
         self.hiddenLayer.backprop(self.lrate, actVectorInput, errorVector, self.outputLayer)
