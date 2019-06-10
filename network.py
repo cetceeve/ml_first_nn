@@ -48,27 +48,31 @@ class Network:
         t0 = time.time()
         self.trainEpoch(types, groundTruths, dataVectors)
         t1 = time.time()
-        print(t1 - t0)
+        print("\n" + str(t1 - t0))
 
     def trainEpoch(self, types, groundTruths, dataVectors):
         counter = 0
         for vector, groundTruth in zip(dataVectors, groundTruths):
             self.feedSample(vector, groundTruth)
             counter += 1
-            print(str(counter) + "/40000", end="\r")
+            print(str(counter) + "/40000", end=", ")
 
     def feedSample(self, dataVector, groundTruth):
         actVectorInput = self.inputLayer.feedSample(dataVector)
         actVectorHidden = self.hiddenLayer.feedSample(actVectorInput)
         actVectorOutput = self.outputLayer.feedSample(actVectorHidden)
-        errorVector = self.error(actVectorOutput, groundTruth)
-        self.backprop(errorVector, actVectorHidden)
 
-    def error(self, actVectorOutput, groundTruth):
+        errorVector = self.getErrorVector(actVectorOutput, groundTruth)
+        self.backprop(errorVector, actVectorHidden, actVectorInput)
+        print(0.5 * sum(errorVector)**2, end="\n")
+        
+
+    def getErrorVector(self, actVectorOutput, groundTruth):
         return [truth - act for act, truth in zip(actVectorOutput, groundTruth)]
     
-    def backprop(self, errorVector, actVectorHidden):
+    def backprop(self, errorVector, actVectorHidden, actVectorInput):
         self.outputLayer.backprop(self.lrate, errorVector, actVectorHidden)
+        self.hiddenLayer.backprop(self.lrate, actVectorInput, errorVector, self.outputLayer)
 
 if __name__ == "__main__":
     Network()
