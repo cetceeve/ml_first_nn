@@ -1,4 +1,5 @@
 import csv
+import time
 import numpy as np
 
 from inputlayer import InputLayer
@@ -10,36 +11,53 @@ class Network:
     numOfHiddens = 12
     numOfOutputs = 4
 
-    dataVector = (0.772040289,0.512995131,-1.261525632,-1.10916658,1.105782323,-1.1127501,0.516377072,0.270915513,0.410573473, -1)
-
     def __init__(self):
         # create all layers
         self.inputLayer = InputLayer(self.numOfInputs)
         self.hiddenLayer = HiddenLayer(self.numOfInputs, self.numOfHiddens)
         self.outputLayer = OutputLayer(self.numOfHiddens, self.numOfOutputs)
 
-        self.feedSample(self.dataVector)
-        # types, groundTruths, dataVectors = self.getData()
+        types, groundTruths, dataVectors = self.getData()
+        self.trainNetwork(types, groundTruths, dataVectors)
         
     def getData(self):
         rawData = self.readCSV()
         types, groundTruths = self.getGTs(rawData)
-        dataVectors = np.array([row[:-1] for row in rawData], float)
+        dataVectors = np.array([self._assignBias(row) for row in rawData], float)
         return types, groundTruths, dataVectors
-        
+
+    def _assignBias(self, vector):
+        vector[-1] = -1
+        return vector
+
     def readCSV(self):
         with open("samples_4_classes_normalized.csv", mode="r") as dataFile:
             return list(csv.reader(dataFile))[1:]
     
     def getGTs(self, rawData):
-        types = list({row[len(row) - 1] for row in rawData})
+        types = list({row[-1] for row in rawData})
         groundTruths = np.full((len(rawData), len(types)), -1, int)
         
         for i, row in enumerate(rawData):
-            groundTruths[i][types.index(row[len(row) - 1])] = 1
+            groundTruths[i][types.index(row[-1])] = 1
         return types, groundTruths
 
-    def feedSample(self, dataVector):
+
+    def trainNetwork(self, types, groundTruths, dataVectors):
+        t0 = time.time()
+        self.trainEpoch(types, groundTruths, dataVectors)
+        t1 = time.time()
+        print(t1 - t0)
+
+    def trainEpoch(self, types, groundTruths, dataVectors):
+        counter = 0
+        for vector, groundTruth in zip(dataVectors, groundTruths):
+            self.feedSample(vector, groundTruth)
+            counter += 1
+            print(str(counter) + "/40000", end="\r")
+            # break # open up loop when ready
+
+    def feedSample(self, dataVector, groundTruth):
         actInput = self.inputLayer.feedSample(dataVector)
         actHidden = self.hiddenLayer.feedSample(actInput)
         actOutput = self.outputLayer.feedSample(actHidden)
