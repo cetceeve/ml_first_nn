@@ -7,32 +7,36 @@ from inputlayer import InputLayer
 from hiddenlayer import HiddenLayer
 from outputlayer import OutputLayer
 
+
 class Network:
     numOfInputs = 10
-    numOfHiddens = 6
+    numOfHiddens = 8
     numOfOutputs = 4
-    bias = -1
-    lrate = 0.01
+    bias = 0.1
+    lrate = 0.02
 
     numOfSuccess = 0
     numOfFailure = 0
-    successRateLastTurn = 0
+    successRateLastTurn = .5
 
     continueTraining = True
-    precision = 0.000002
+    precision = 0.000005
 
     def __init__(self):
         # create all layers
         self.inputLayer = InputLayer(self.numOfInputs)
-        self.hiddenLayer = HiddenLayer(self.numOfInputs, self.numOfHiddens)
-        self.outputLayer = OutputLayer(self.numOfHiddens, self.numOfOutputs)
+        self.hiddenLayer = HiddenLayer(self.numOfInputs, self.numOfHiddens, "relu")
+        self.outputLayer = OutputLayer(self.numOfHiddens, self.numOfOutputs, "tanh")
 
         types, groundTruths, dataVectors = self.getData()
         t0 = time.time()
         self.trainNetwork(types, groundTruths, dataVectors)
         t1 = time.time()
         print("\nTime: " + str(t1 - t0))
-        
+        print(self.hiddenLayer.weights)
+        print("------------------------------------")
+        print(self.outputLayer.weights)
+
     def getData(self):
         rawData = self.readCSV()
         shuffle(rawData)
@@ -47,15 +51,14 @@ class Network:
     def readCSV(self):
         with open("samples_4_classes_normalized.csv", mode="r") as dataFile:
             return list(csv.reader(dataFile))[1:]
-    
+
     def getGTs(self, rawData):
         types = list({row[-1] for row in rawData})
         groundTruths = np.full((len(rawData), len(types)), -1, int)
-        
+
         for i, row in enumerate(rawData):
             groundTruths[i][types.index(row[-1])] = 1
         return types, groundTruths
-
 
     def trainNetwork(self, types, groundTruths, dataVectors):
         epoCounter = 0
@@ -65,22 +68,18 @@ class Network:
 
     def trainEpoch(self, types, groundTruths, dataVectors, epoCounter):
         counter = 0
-        precRates = []
         for vector, groundTruth in zip(dataVectors, groundTruths):
             self.feedSample(vector, groundTruth)
 
             # control operation
             counter += 1
-            if self.numOfSuccess != 0:
-                precRates.append(abs(self.successRateLastTurn - self.numOfFailure/self.numOfSuccess))
-                self.successRateLastTurn = self.numOfFailure/self.numOfSuccess
             if counter % 100 == 0:
-                print("Epo: " + epoCounter + " Data: " + str(counter) + "/40000 Prec: " + str(1 - self.successRateLastTurn), end="\r")
-            if counter % 1000 == 0:
-                if sum(precRates)/len(precRates) < self.precision:
+                print("Epo: " + epoCounter + " Data: " + str(counter) + "/40000 Prec: " + str(1 - self.numOfFailure/self.numOfSuccess), end="\r")
+            if counter % 100 == 0:
+                if abs(self.successRateLastTurn - self.numOfFailure/self.numOfSuccess) < self.precision:
                     self.continueTraining = False
                     return
-                precRates = []
+                self.successRateLastTurn = self.numOfFailure/self.numOfSuccess
 
     def feedSample(self, dataVector, groundTruth):
         actVectorInput = self.inputLayer.feedSample(dataVector)
@@ -93,7 +92,7 @@ class Network:
 
     def getErrorVector(self, actVectorOutput, groundTruth):
         return [truth - act for act, truth in zip(actVectorOutput, groundTruth)]
-    
+
     def backprop(self, errorVector, actVectorHidden, actVectorInput):
         self.outputLayer.backprop(self.lrate, errorVector, actVectorHidden)
         self.hiddenLayer.backprop(self.lrate, actVectorInput, errorVector, self.outputLayer)
@@ -103,6 +102,7 @@ class Network:
             self.numOfSuccess += 1
         else:
             self.numOfFailure += 1
+
 
 if __name__ == "__main__":
     Network()

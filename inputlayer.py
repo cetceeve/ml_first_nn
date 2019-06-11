@@ -1,9 +1,10 @@
 import numpy as np
 from neuron import Neuron
 
+
 class InputLayer():
     def __init__(self, numOfNeurons):
-        self.weights = np.ones((numOfNeurons, numOfNeurons))
+        # self.weights = np.ones((numOfNeurons, numOfNeurons))
         self.neurons = [Neuron() for i in range(numOfNeurons)]
 
     def feedSample(self, dataVector):
