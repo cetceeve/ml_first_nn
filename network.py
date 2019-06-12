@@ -54,7 +54,7 @@ class Network:
 
     def getGTs(self, rawData):
         types = list({row[-1] for row in rawData})
-        groundTruths = np.full((len(rawData), len(types)), -1, int)
+        groundTruths = np.full((len(rawData), len(types)), 0, int)
 
         for i, row in enumerate(rawData):
             groundTruths[i][types.index(row[-1])] = 1
@@ -93,9 +93,8 @@ class Network:
         return [truth - act for act, truth in zip(actVectorOutput, groundTruth)]
 
     def backprop(self, errorVector, actVectorHidden, actVectorInput):
+        self.hiddenLayer.backprop(self.lrate, actVectorInput, errorVector, self.outputLayer)
         self.outputLayer.backprop(self.lrate, errorVector, actVectorHidden)
-        self.hiddenLayer.backprop(
-            self.lrate, actVectorInput, errorVector, self.outputLayer)
 
     def predict(self, actVectorOutput, groundTruth):
         if groundTruth[np.argmax(actVectorOutput)] > 0:
