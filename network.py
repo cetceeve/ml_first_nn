@@ -13,7 +13,7 @@ class Network:
     numOfHiddens = 8
     numOfOutputs = 4
     bias = 0.1
-    lrate = 0.02
+    lrate = 0.01
 
     numOfSuccess = 0
     numOfFailure = 0
@@ -25,8 +25,8 @@ class Network:
     def __init__(self):
         # create all layers
         self.inputLayer = InputLayer(self.numOfInputs)
-        self.hiddenLayer = HiddenLayer(self.numOfInputs, self.numOfHiddens, "relu")
-        self.outputLayer = OutputLayer(self.numOfHiddens, self.numOfOutputs, "tanh")
+        self.hiddenLayer = HiddenLayer(self.numOfInputs, self.numOfHiddens, "lrelu")
+        self.outputLayer = OutputLayer(self.numOfHiddens, self.numOfOutputs, "lrelu")
 
         types, groundTruths, dataVectors = self.getData()
         t0 = time.time()
@@ -75,7 +75,6 @@ class Network:
             counter += 1
             if counter % 100 == 0:
                 print("Epo: " + epoCounter + " Data: " + str(counter) + "/40000 Prec: " + str(1 - self.numOfFailure/self.numOfSuccess), end="\r")
-            if counter % 100 == 0:
                 if abs(self.successRateLastTurn - self.numOfFailure/self.numOfSuccess) < self.precision:
                     self.continueTraining = False
                     return
@@ -95,7 +94,8 @@ class Network:
 
     def backprop(self, errorVector, actVectorHidden, actVectorInput):
         self.outputLayer.backprop(self.lrate, errorVector, actVectorHidden)
-        self.hiddenLayer.backprop(self.lrate, actVectorInput, errorVector, self.outputLayer)
+        self.hiddenLayer.backprop(
+            self.lrate, actVectorInput, errorVector, self.outputLayer)
 
     def predict(self, actVectorOutput, groundTruth):
         if groundTruth[np.argmax(actVectorOutput)] > 0:

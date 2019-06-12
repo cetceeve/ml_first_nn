@@ -15,16 +15,13 @@ class Neuron:
             self._relu(scalar)
         elif self.func == "sig":
             self._sig(scalar)
-        # elif self.func == "softmax":
-            # self._softmax(scalar)
+        elif self.func == "lrelu":
+            self._lrelu(scalar)
         return self.act
 
     def directActivation(self, x):
         self.act = x
 
-        # sigmoid
-        # if x < 0:
-        #     x = 0
         # self.act = 1 / (1 + np.exp(-x))
         # self.act = np.tanh(x)
         return self.act
@@ -40,9 +37,14 @@ class Neuron:
         else:
             self.firstDeriv = 1.0
 
+    def _lrelu(self, x):
+        if x < 0:
+            self.act = min(0.0, 0.2*x)
+            self.firstDeriv = 0.2
+        else:
+            self.act = max(0.0, x)
+            self.firstDeriv = 1.0
+
     def _sig(self, x):
         self.act = 1 / (1 + np.exp(-x))
         self.deriv = self.act * (1 - self.act)
-
-    # def _softmax(self, x):
-    #     self.act = np.exp(x) / np.sum(np.exp(x))
