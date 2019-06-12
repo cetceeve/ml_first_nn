@@ -12,9 +12,9 @@ class HiddenLayer():
 
     def backprop(self, lrate, actVectorInput, errorVector, outputLayer):
         # neue gewichte = bisherige gewichte * lrate * aktivierung input * ableitung aktivierungsfunktions hier * summe über output neuronen((GT - act output) * first deriv output * weight)
-        for i, neuron in enumerate(self.neurons):
-            for j, actInput in enumerate(actVectorInput):
-                self.weights[i][j] += lrate * actInput * neuron.firstDeriv * self._sumErrorOutputLayer(errorVector, outputLayer, i)
+        for j, neuron in enumerate(self.neurons):
+            for i, actInput in enumerate(actVectorInput):
+                self.weights[j][i] += lrate * actInput * neuron.firstDeriv * self._sumErrorOutputLayer(errorVector, outputLayer, j)
 
     def _sumErrorOutputLayer(self, errorVector, outputLayer, hiddenLayerNeuronIndex):
-        return sum([errorVector[i] * neuron.firstDeriv * outputLayer.weights[i][hiddenLayerNeuronIndex] for i, neuron in enumerate(outputLayer.neurons)])
+        return sum([errorVector[k] * neuron.firstDeriv * outputLayer.weights[k][hiddenLayerNeuronIndex] for k, neuron in enumerate(outputLayer.neurons)])
