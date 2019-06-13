@@ -14,12 +14,13 @@ class Network:
     bias = 0.1
     lrate = 0.01
 
-    numOfSuccess = 0
-    numOfFailure = 0
+    sumError = 0
     successRateLastTurn = .5
-
+    precision = 0.00001
     continueTraining = True
-    precision = 0.000005
+
+    numOfSuccess = 1
+    numOfFailure = 0
 
     def __init__(self):
         types, groundTruths, dataVectors = self.getData()
@@ -73,11 +74,12 @@ class Network:
             # control operation
             counter += 1
             if counter % 100 == 0:
-                print("Epo: " + epoCounter + " Data: " + str(counter) + "/40000 Prec: " + str(1 - self.numOfFailure/self.numOfSuccess), end="\r")
-                if abs(self.successRateLastTurn - self.numOfFailure/self.numOfSuccess) < self.precision:
+                print("Epo: " + epoCounter + " Data: " + str(counter) + "/40000 Prec: " + " TErr: " +
+                      str(1 - self.sumError/counter) + " Clf SR: " + str(1 - self.numOfFailure/self.numOfSuccess), end="\r")
+                if abs(self.successRateLastTurn - self.sumError/counter) < self.precision:
                     self.continueTraining = False
                     return
-                self.successRateLastTurn = self.numOfFailure/self.numOfSuccess
+                self.successRateLastTurn = self.sumError/counter
 
     def feedSample(self, dataVector, groundTruth):
         actVectorInput = self.inputLayer.feedSample(dataVector)
@@ -85,6 +87,7 @@ class Network:
         actVectorOutput = self.outputLayer.feedSample(actVectorHidden)
 
         errorVector = self.getErrorVector(actVectorOutput, groundTruth)
+        self.sumError += sum(errorVector)/len(errorVector)
         self.predict(actVectorOutput, groundTruth)
         self.backprop(errorVector, actVectorHidden, actVectorInput)
 
