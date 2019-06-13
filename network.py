@@ -9,9 +9,8 @@ from outputlayer import OutputLayer
 
 
 class Network:
-    numOfInputs = 10
     numOfHiddens = 8
-    numOfOutputs = 4
+    # numOfOutputs = 4
     bias = 0.1
     lrate = 0.01
 
@@ -23,12 +22,12 @@ class Network:
     precision = 0.000005
 
     def __init__(self):
-        # create all layers
-        self.inputLayer = InputLayer(self.numOfInputs)
-        self.hiddenLayer = HiddenLayer(self.numOfInputs, self.numOfHiddens, "lrelu")
-        self.outputLayer = OutputLayer(self.numOfHiddens, self.numOfOutputs, "lrelu")
-
         types, groundTruths, dataVectors = self.getData()
+        # create all layers
+        self.inputLayer = InputLayer(len(dataVectors[0]))
+        self.hiddenLayer = HiddenLayer(len(dataVectors[0]), self.numOfHiddens, "lrelu")
+        self.outputLayer = OutputLayer(self.numOfHiddens, len(types), "lrelu")
+
         t0 = time.time()
         self.trainNetwork(types, groundTruths, dataVectors)
         t1 = time.time()
